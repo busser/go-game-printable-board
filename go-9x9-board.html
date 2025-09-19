@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>9x9 Go Board</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+      }
+      svg {
+        width: 210mm;
+        height: 297mm;
+      }
+    </style>
+  </head>
+  <body>
+    <svg
+      id="board"
+      xmlns="http://www.w3.org/2000/svg"
+      width="210mm"
+      height="297mm"
+      viewBox="0 0 210 297"
+      preserveAspectRatio="xMidYMid meet"
+    ></svg>
+
+    <script>
+      // Official 9x9 Go board dimensions in millimeters (SVG coordinates = millimeters)
+      const boardSize = 9;
+      const lineSpacingX = 22.50; // 22.50mm horizontal spacing
+      const lineSpacingY = 23.86; // 23.86mm vertical spacing
+      const gridLineWeight = 0.7; // 0.7mm grid lines
+      const borderLineWeight = 1.5; // 1.5mm border lines
+      const starPointDiameter = 3.6; // 3.6mm star point diameter
+
+      // A4 paper: 210mm × 297mm
+      const a4Width = 210;
+      const a4Height = 297;
+
+      // Official board dimensions: 180.0mm × 190.9mm
+      const boardWidth = 8 * lineSpacingX;  // 8 × 22.50 = 180.0mm
+      const boardHeight = 8 * lineSpacingY; // 8 × 23.86 = 190.88mm ≈ 190.9mm
+
+      // Official margins: 15.0mm left/right, ~54.1mm top/bottom
+      const marginX = 15.0;
+      const marginY = (a4Height - boardHeight) / 2; // ≈ 53.06mm
+
+      function getIntersectionPosition(row, column) {
+        // Convert 1-based row/column to coordinates with asymmetric spacing
+        const x = marginX + (column - 1) * lineSpacingX;
+        const y = marginY + (row - 1) * lineSpacingY;
+        return [x, y];
+      }
+
+      const board = document.getElementById("board");
+
+      // Draw interior grid lines (not border lines)
+      for (let row = 2; row <= boardSize - 1; row++) {
+        const [x1, y1] = getIntersectionPosition(row, 1);
+        const [x2, y2] = getIntersectionPosition(row, boardSize);
+        board.innerHTML += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="black" stroke-width="${gridLineWeight}"/>`;
+      }
+
+      for (let col = 2; col <= boardSize - 1; col++) {
+        const [x1, y1] = getIntersectionPosition(1, col);
+        const [x2, y2] = getIntersectionPosition(boardSize, col);
+        board.innerHTML += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="black" stroke-width="${gridLineWeight}"/>`;
+      }
+
+      // Draw border rectangle
+      const [topLeft_x, topLeft_y] = getIntersectionPosition(1, 1);
+      const [bottomRight_x, bottomRight_y] = getIntersectionPosition(boardSize, boardSize);
+      const rectWidth = bottomRight_x - topLeft_x;
+      const rectHeight = bottomRight_y - topLeft_y;
+
+      board.innerHTML += `<rect x="${topLeft_x}" y="${topLeft_y}" width="${rectWidth}" height="${rectHeight}"
+                          fill="none" stroke="black" stroke-width="${borderLineWeight}"
+                          stroke-linejoin="miter" stroke-linecap="square"/>`;
+
+      // Draw star points for 9x9 board
+      const starPoints = [
+        [3, 3], [3, 7], // top corners
+        [5, 5],         // center
+        [7, 3], [7, 7]  // bottom corners
+      ];
+
+      for (const [row, col] of starPoints) {
+        const [x, y] = getIntersectionPosition(row, col);
+        const radius = starPointDiameter / 2;
+        board.innerHTML += `<circle cx="${x}" cy="${y}" r="${radius}" fill="black"/>`;
+      }
+    </script>
+  </body>
+</html>
